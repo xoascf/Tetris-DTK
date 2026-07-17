@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = tetris-deepin
 TEMPLATE = app
 
+CONFIG += console
 DEFINES += QT_DEPRECATED_WARNINGS
 
 

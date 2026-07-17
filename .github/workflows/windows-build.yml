@@ -165,11 +165,11 @@ jobs:
           touch .changed
           while [ -f .changed ]; do
             rm .changed
-            for binary in tetris-deepin.exe *.dll; do
+            find . -type f \( -name "*.exe" -o -name "*.dll" \) | while read -r binary; do
               (ldd "$binary" 2>/dev/null || true) | (grep -iE '[/\\]mingw64[/\\]' || true) | awk '{print $3}' | while read -r dep; do
                 base=$(basename "$dep")
                 if [ ! -f "$base" ] && [ -f "$dep" ]; then
-                  cp "$dep" . && echo "Copied: $base"
+                  cp "$dep" . && echo "Copied: $base (required by $binary)"
                   touch .changed
                 fi
               done
@@ -178,6 +178,14 @@ jobs:
           echo "--- Bundled DLLs ---"
           ls -1 *.dll | wc -l
           echo "DLLs total"
+
+      - name: Test Run (GDB Backtrace)
+        working-directory: Tetris-DTK/build-win/release
+        run: |
+          pacman -S --noconfirm mingw-w64-x86_64-gdb
+          export PATH="/mingw64/bin:/mingw64/lib:$PATH"
+          echo "Running tetris-deepin.exe in GDB..."
+          gdb -batch -ex "run" -ex "bt full" -ex "quit" ./tetris-deepin.exe || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
