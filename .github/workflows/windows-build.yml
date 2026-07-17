@@ -95,9 +95,9 @@ jobs:
         working-directory: dtkcore
         run: |
           $cpp = Get-Content src/util/dtextencoding.cpp -Raw
-          $cpp = $cpp -replace '#include <unicode/ucsdet\.h>', "typedef struct UCharsetDetector UCharsetDetector; typedef struct UCharsetMatch UCharsetMatch; typedef int UErrorCode;"
+          $cpp = $cpp -replace '#include <unicode/ucsdet\.h>', "typedef struct UCharsetDetector UCharsetDetector; typedef struct UCharsetMatch UCharsetMatch; typedef int UErrorCode; #define U_ZERO_ERROR 0`n#define U_FAILURE(x) ((x)>0)"
           $cpp = $cpp -replace '#include <uchardet/uchardet\.h>', "typedef struct uchardet *uchardet_t;"
-          $cpp = $cpp -replace '#include <iconv\.h>', "typedef void* iconv_t;"
+          $cpp = $cpp -replace '#include <iconv\.h>', "typedef void* iconv_t; inline iconv_t iconv_open(const char*, const char*) { return (iconv_t)(-1); } inline size_t iconv(iconv_t, char**, size_t*, char**, size_t*) { return (size_t)(-1); } inline int iconv_close(iconv_t) { return -1; }"
           Set-Content src/util/dtextencoding.cpp -Value $cpp
           $cmake = Get-Content src/CMakeLists.txt -Raw
           $cmake = $cmake -replace 'find_package\(ICU REQUIRED COMPONENTS uc\)', ''
