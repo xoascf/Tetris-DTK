@@ -153,8 +153,9 @@ jobs:
           # 1. Let Qt's own tool handle Qt libraries and plugins
           windeployqt6 tetris-deepin.exe --compiler-runtime || true
 
-          # Explicitly copy DTK libraries just to be absolutely certain
-          cp -n /mingw64/bin/libdtk6*.dll . 2>/dev/null || true
+          # Explicitly copy DTK libraries (they install to lib instead of bin on Windows!)
+          cp -n /mingw64/lib/libdtk6*.dll . 2>/dev/null || true
+          cp -n /mingw64/lib/libdtk6log.dll . 2>/dev/null || true
           cp -n /mingw64/bin/libspdlog.dll . 2>/dev/null || true
           cp -n /mingw64/bin/libuchardet.dll . 2>/dev/null || true
 
