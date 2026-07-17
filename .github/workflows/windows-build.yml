@@ -153,24 +153,24 @@ jobs:
           # 1. Let Qt's own tool handle Qt libraries and plugins
           windeployqt6 tetris-deepin.exe --compiler-runtime || true
 
-          # Explicitly copy DTK libraries (they install to lib instead of bin on Windows!)
+          # 2. Copy DTK libraries (cmake installs them to lib/ not bin/)
           cp -n /mingw64/lib/libdtk6*.dll . 2>/dev/null || true
-          cp -n /mingw64/lib/libdtk6log.dll . 2>/dev/null || true
-          cp -n /mingw64/bin/libspdlog.dll . 2>/dev/null || true
-          cp -n /mingw64/bin/libuchardet.dll . 2>/dev/null || true
 
-          # 2. Recursively resolve ALL mingw64 DLL dependencies
-          #    Keep scanning until no new DLLs are discovered
-          changed=1
-          while [ "$changed" -eq 1 ]; do
-            changed=0
+          # 3. Add /mingw64/lib to PATH so ldd can resolve DTK DLLs
+          export PATH="/mingw64/lib:$PATH"
+
+          # 4. Recursively resolve ALL mingw64 DLL dependencies.
+          #    Use a temp file flag because 'while read' runs in a subshell
+          #    and cannot modify the parent shell's variables.
+          touch .changed
+          while [ -f .changed ]; do
+            rm .changed
             for binary in tetris-deepin.exe *.dll; do
-              # Use || true to prevent set -eo pipefail from aborting the script
               (ldd "$binary" 2>/dev/null || true) | (grep -iE '[/\\]mingw64[/\\]' || true) | awk '{print $3}' | while read -r dep; do
                 base=$(basename "$dep")
                 if [ ! -f "$base" ] && [ -f "$dep" ]; then
                   cp "$dep" . && echo "Copied: $base"
-                  changed=1
+                  touch .changed
                 fi
               done
             done
