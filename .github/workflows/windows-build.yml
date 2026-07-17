@@ -143,6 +143,7 @@ jobs:
         working-directory: Tetris-DTK
         run: |
           mkdir build-win && cd build-win
+          lrelease ../Tetris.pro
           qmake6 ../Tetris.pro "PREFIX=/mingw64"
           mingw32-make
 
