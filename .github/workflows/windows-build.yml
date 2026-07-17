@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
 
     steps:
       - name: Checkout Tetris-DTK
@@ -16,19 +19,24 @@ jobs:
         with:
           path: Tetris-DTK
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
         with:
-          version: '6.8.*'
-          arch: 'win64_msvc2022_64'
-          cache: 'true'
-
-      - name: Install Ninja & CMake
-        run: |
-          choco install ninja cmake pkgconfiglite -y
-
-      - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-qt6-base
+            mingw-w64-x86_64-qt6-tools
+            mingw-w64-x86_64-qt6-svg
+            mingw-w64-x86_64-spdlog
+            mingw-w64-x86_64-icu
+            mingw-w64-x86_64-uchardet
+            mingw-w64-x86_64-libiconv
+            git
 
       # DTK Common
       - name: Checkout dtkcommon
@@ -40,20 +48,8 @@ jobs:
       - name: Build dtkcommon
         working-directory: dtkcommon
         run: |
-          mkdir build
-          cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
-          cmake --build .
-          cmake --install .
-
-      # spdlog
-      - name: Install spdlog
-        run: |
-          git clone --depth 1 -b v1.17.0 https://github.com/gabime/spdlog.git
-          cd spdlog
-          mkdir build
-          cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_EXAMPLE=OFF
+          mkdir build && cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
           cmake --build .
           cmake --install .
 
@@ -70,16 +66,12 @@ jobs:
         run: |
           git fetch origin pull/48/head:pr48
           git checkout pr48
-          $content = Get-Content src/ConsoleAppender.cpp -Raw
-          $content = $content -replace '#include <unistd\.h>', "#ifdef _WIN32`n#include <io.h>`n#include <stdio.h>`n#define isatty _isatty`n#define STDOUT_FILENO _fileno(stdout)`n#else`n#include <unistd.h>`n#endif"
-          Set-Content src/ConsoleAppender.cpp -Value $content
 
       - name: Build dtklog
         working-directory: dtklog
         run: |
-          mkdir build
-          cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
+          mkdir build && cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
           cmake --build .
           cmake --install .
 
@@ -91,32 +83,11 @@ jobs:
           path: dtkcore
           ref: 14054a81d42fd9a7952936b23f453edbefdc042b
 
-      - name: Patch dtkcore for MSVC (mock dynamic text encoding headers)
-        working-directory: dtkcore
-        run: |
-          $cpp = Get-Content src/util/dtextencoding.cpp -Raw
-          $cpp = $cpp -replace '#include <unicode/ucsdet\.h>', "typedef struct UCharsetDetector UCharsetDetector; typedef struct UCharsetMatch UCharsetMatch; typedef int UErrorCode; #define U_ZERO_ERROR 0`n#define U_FAILURE(x) ((x)>0)"
-          $cpp = $cpp -replace '#include <uchardet/uchardet\.h>', "typedef struct uchardet *uchardet_t;"
-          $cpp = $cpp -replace '#include <iconv\.h>', "typedef void* iconv_t; inline iconv_t iconv_open(const char*, const char*) { return (iconv_t)(-1); } inline size_t iconv(iconv_t, char**, size_t*, char**, size_t*) { return (size_t)(-1); } inline int iconv_close(iconv_t) { return -1; }"
-          Set-Content src/util/dtextencoding.cpp -Value $cpp
-          $cmake = Get-Content src/CMakeLists.txt -Raw
-          $cmake = $cmake -replace 'find_package\(ICU REQUIRED COMPONENTS uc\)', ''
-          $cmake = $cmake -replace 'pkg_check_modules\(uchardet REQUIRED uchardet\)', ''
-          $cmake = $cmake -replace 'find_package\(Qt6 REQUIRED COMPONENTS CorePrivate\)', ''
-          Set-Content src/CMakeLists.txt -Value $cmake
-          $dci_h = Get-Content src/dci/private/ddcifileengine_p.h -Raw
-          $dci_h = $dci_h -replace 'QT_VERSION_CHECK\(6, 9, 0\)', 'QT_VERSION_CHECK(6, 8, 1)'
-          Set-Content src/dci/private/ddcifileengine_p.h -Value $dci_h
-          $dci_cpp = Get-Content src/dci/private/ddcifileengine.cpp -Raw
-          $dci_cpp = $dci_cpp -replace 'QT_VERSION_CHECK\(6, 9, 0\)', 'QT_VERSION_CHECK(6, 8, 1)'
-          Set-Content src/dci/private/ddcifileengine.cpp -Value $dci_cpp
-
       - name: Build dtkcore
         working-directory: dtkcore
         run: |
-          mkdir build
-          cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
+          mkdir build && cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
           cmake --build .
           cmake --install .
 
@@ -137,9 +108,8 @@ jobs:
       - name: Build dtkgui
         working-directory: dtkgui
         run: |
-          mkdir build
-          cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
+          mkdir build && cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
           cmake --build .
           cmake --install .
 
@@ -160,9 +130,8 @@ jobs:
       - name: Build dtkwidget
         working-directory: dtkwidget
         run: |
-          mkdir build
-          cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+          mkdir build && cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
           cmake --build .
           cmake --install .
 
@@ -170,10 +139,9 @@ jobs:
       - name: Build Tetris-DTK
         working-directory: Tetris-DTK
         run: |
-          mkdir build-win
-          cd build-win
-          qmake ../Tetris.pro "PREFIX=C:/dtk"
-          nmake
+          mkdir build-win && cd build-win
+          qmake6 ../Tetris.pro "PREFIX=/mingw64"
+          mingw32-make
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
