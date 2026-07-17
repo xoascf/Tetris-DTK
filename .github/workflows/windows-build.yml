@@ -1,0 +1,106 @@
+name: Build Windows App
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Tetris-DTK
+        uses: actions/checkout@v4
+        with:
+          path: Tetris-DTK
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5.3'
+          arch: 'win64_msvc2019_64'
+          cache: 'true'
+
+      - name: Install Ninja & CMake
+        run: |
+          choco install ninja cmake -y
+
+      # DTK Core (PR 573 merged commit)
+      - name: Checkout dtkcore
+        uses: actions/checkout@v4
+        with:
+          repository: linuxdeepin/dtkcore
+          path: dtkcore
+          ref: 14054a81d42fd9a7952936b23f453edbefdc042b
+
+      - name: Build dtkcore
+        working-directory: dtkcore
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk"
+          cmake --build .
+          cmake --install .
+
+      # DTK Gui (with PR 400)
+      - name: Checkout dtkgui
+        uses: actions/checkout@v4
+        with:
+          repository: linuxdeepin/dtkgui
+          path: dtkgui
+          fetch-depth: 0
+
+      - name: Apply PR 400 to dtkgui
+        working-directory: dtkgui
+        run: |
+          git fetch origin pull/400/head:pr400
+          git checkout pr400
+
+      - name: Build dtkgui
+        working-directory: dtkgui
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk"
+          cmake --build .
+          cmake --install .
+
+      # DTK Widget (with PR 757)
+      - name: Checkout dtkwidget
+        uses: actions/checkout@v4
+        with:
+          repository: linuxdeepin/dtkwidget
+          path: dtkwidget
+          fetch-depth: 0
+
+      - name: Apply PR 757 to dtkwidget
+        working-directory: dtkwidget
+        run: |
+          git fetch origin pull/757/head:pr757
+          git checkout pr757
+
+      - name: Build dtkwidget
+        working-directory: dtkwidget
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk"
+          cmake --build .
+          cmake --install .
+
+      # Build Tetris-DTK
+      - name: Build Tetris-DTK
+        working-directory: Tetris-DTK
+        run: |
+          mkdir build-win
+          cd build-win
+          qmake ../Tetris.pro "PREFIX=C:/dtk"
+          nmake
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tetris-deepin-windows
+          path: Tetris-DTK/build-win/release/tetris-deepin.exe
