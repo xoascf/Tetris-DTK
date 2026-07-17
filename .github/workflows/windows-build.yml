@@ -46,7 +46,7 @@ jobs:
       # spdlog
       - name: Install spdlog
         run: |
-          git clone --depth 1 -b v1.12.0 https://github.com/gabime/spdlog.git
+          git clone --depth 1 -b v1.17.0 https://github.com/gabime/spdlog.git
           cd spdlog
           mkdir build
           cd build
