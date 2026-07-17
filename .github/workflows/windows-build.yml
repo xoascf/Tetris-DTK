@@ -151,6 +151,7 @@ jobs:
         working-directory: qt6integration
         run: |
           sed -i '/platformthemeplugin/d' CMakeLists.txt
+          sed -i 's/find_package(Dtk${VERSION_SUFFIX} REQUIRED COMPONENTS Widget)/find_package(Qt6 COMPONENTS Svg REQUIRED)\nfind_package(Dtk${VERSION_SUFFIX} REQUIRED COMPONENTS Widget)/' CMakeLists.txt
           mkdir build && cd build
           cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF
           cmake --build .
