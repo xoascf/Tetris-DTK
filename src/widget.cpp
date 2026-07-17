@@ -7,15 +7,7 @@
 Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget), m_muted(false), m_highScore(0) {
   ui->setupUi(this);
 
-  // Set dark theme style for the whole window
-  setStyleSheet(
-    "QWidget { background-color: #1e1e1e; color: white; }"
-    "QLabel { background-color: transparent; color: white; }"
-    "QPushButton { background-color: #333333; color: white; border: 1px solid #555555; border-radius: 4px; padding: 5px; }"
-    "QPushButton:hover { background-color: #444444; }"
-    "#nextContainer { background-color: #232323; border-radius: 10px; }"
-    "QPushButton { min-width: 90px; max-width: 90px; }"
-  );
+
 
   m_gameBoard = new GameBoard(this);
   m_nextPieceWidget = new NextPieceWidget(this);
