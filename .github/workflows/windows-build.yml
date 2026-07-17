@@ -140,6 +140,22 @@ jobs:
           cmake --build .
           cmake --install .
 
+      # DTK Qt6 Integration (Chameleon Style)
+      - name: Checkout qt6integration
+        uses: actions/checkout@v7
+        with:
+          repository: linuxdeepin/qt6integration
+          path: qt6integration
+
+      - name: Build qt6integration
+        working-directory: qt6integration
+        run: |
+          sed -i '/platformthemeplugin/d' CMakeLists.txt
+          mkdir build && cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF
+          cmake --build .
+          cmake --install .
+
       # Build Tetris-DTK
       - name: Build Tetris-DTK
         working-directory: Tetris-DTK
@@ -154,6 +170,9 @@ jobs:
         run: |
           # 1. Let Qt's own tool handle Qt libraries and plugins
           windeployqt6 tetris-deepin.exe --compiler-runtime || true
+          
+          mkdir -p styles
+          cp /mingw64/share/qt6/plugins/styles/chameleon.dll styles/ || echo "chameleon.dll not found"
 
           # 2. Copy DTK libraries (cmake installs them to lib/ not bin/)
           cp -n /mingw64/lib/libdtk6*.dll . 2>/dev/null || true
