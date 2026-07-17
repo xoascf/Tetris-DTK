@@ -27,6 +27,45 @@ jobs:
         run: |
           choco install ninja cmake -y
 
+      # DTK Common
+      - name: Checkout dtkcommon
+        uses: actions/checkout@v4
+        with:
+          repository: linuxdeepin/dtkcommon
+          path: dtkcommon
+
+      - name: Build dtkcommon
+        working-directory: dtkcommon
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+          cmake --build .
+          cmake --install .
+
+      # DTK Log (with PR 48)
+      - name: Checkout dtklog
+        uses: actions/checkout@v4
+        with:
+          repository: linuxdeepin/dtklog
+          path: dtklog
+          fetch-depth: 0
+
+      - name: Apply PR 48 to dtklog
+        working-directory: dtklog
+        run: |
+          git fetch origin pull/48/head:pr48
+          git checkout pr48
+
+      - name: Build dtklog
+        working-directory: dtklog
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+          cmake --build .
+          cmake --install .
+
       # DTK Core (PR 573 merged commit)
       - name: Checkout dtkcore
         uses: actions/checkout@v4
@@ -40,7 +79,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk"
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
           cmake --build .
           cmake --install .
 
@@ -63,7 +102,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk"
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
           cmake --build .
           cmake --install .
 
@@ -86,7 +125,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk"
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
           cmake --build .
           cmake --install .
 
