@@ -91,6 +91,19 @@ jobs:
           path: dtkcore
           ref: 14054a81d42fd9a7952936b23f453edbefdc042b
 
+      - name: Patch dtkcore for MSVC (mock dynamic text encoding headers)
+        working-directory: dtkcore
+        run: |
+          $cpp = Get-Content src/util/dtextencoding.cpp -Raw
+          $cpp = $cpp -replace '#include <unicode/ucsdet\.h>', "typedef struct UCharsetDetector UCharsetDetector; typedef struct UCharsetMatch UCharsetMatch; typedef int UErrorCode;"
+          $cpp = $cpp -replace '#include <uchardet/uchardet\.h>', "typedef struct uchardet *uchardet_t;"
+          $cpp = $cpp -replace '#include <iconv\.h>', "typedef void* iconv_t;"
+          Set-Content src/util/dtextencoding.cpp -Value $cpp
+          $cmake = Get-Content src/CMakeLists.txt -Raw
+          $cmake = $cmake -replace 'find_package\(ICU REQUIRED COMPONENTS uc\)', ''
+          $cmake = $cmake -replace 'pkg_check_modules\(uchardet REQUIRED uchardet\)', ''
+          Set-Content src/CMakeLists.txt -Value $cmake
+
       - name: Build dtkcore
         working-directory: dtkcore
         run: |
