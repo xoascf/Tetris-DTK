@@ -146,11 +146,31 @@ jobs:
           lrelease ../Tetris.pro
           qmake6 ../Tetris.pro "PREFIX=/mingw64"
           mingw32-make
-          windeployqt6 release/tetris-deepin.exe --compiler-runtime
-          ldd release/tetris-deepin.exe | grep -i "mingw64" | awk '{print $3}' | while read -r dll; do cp -n "$dll" release/ 2>/dev/null || true; done
-          cp -n /mingw64/bin/libdtk6*.dll release/ 2>/dev/null || true
-          cp -n /mingw64/bin/libspdlog.dll release/ 2>/dev/null || true
-          cp -n /mingw64/bin/libuchardet.dll release/ 2>/dev/null || true
+
+      - name: Bundle dependencies
+        working-directory: Tetris-DTK/build-win/release
+        run: |
+          # 1. Let Qt's own tool handle Qt libraries and plugins
+          windeployqt6 tetris-deepin.exe --compiler-runtime
+
+          # 2. Recursively resolve ALL mingw64 DLL dependencies
+          #    Keep scanning until no new DLLs are discovered
+          changed=1
+          while [ "$changed" -eq 1 ]; do
+            changed=0
+            for binary in tetris-deepin.exe *.dll; do
+              ldd "$binary" 2>/dev/null | grep -i '/mingw64/' | awk '{print $3}' | while read -r dep; do
+                base=$(basename "$dep")
+                if [ ! -f "$base" ]; then
+                  cp "$dep" . && echo "Copied: $base"
+                  changed=1
+                fi
+              done
+            done
+          done
+          echo "--- Bundled DLLs ---"
+          ls -1 *.dll | wc -l
+          echo "DLLs total"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
