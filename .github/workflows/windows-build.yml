@@ -70,6 +70,9 @@ jobs:
         run: |
           git fetch origin pull/48/head:pr48
           git checkout pr48
+          $content = Get-Content src/ConsoleAppender.cpp -Raw
+          $content = $content -replace '#include <unistd\.h>', "#ifdef _WIN32`n#include <io.h>`n#include <stdio.h>`n#define isatty _isatty`n#define STDOUT_FILENO _fileno(stdout)`n#else`n#include <unistd.h>`n#endif"
+          Set-Content src/ConsoleAppender.cpp -Value $content
 
       - name: Build dtklog
         working-directory: dtklog
