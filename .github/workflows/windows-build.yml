@@ -104,6 +104,12 @@ jobs:
           $cmake = $cmake -replace 'pkg_check_modules\(uchardet REQUIRED uchardet\)', ''
           $cmake = $cmake -replace 'find_package\(Qt6 REQUIRED COMPONENTS CorePrivate\)', ''
           Set-Content src/CMakeLists.txt -Value $cmake
+          $dci_h = Get-Content src/dci/private/ddcifileengine_p.h -Raw
+          $dci_h = $dci_h -replace 'QT_VERSION_CHECK\(6, 9, 0\)', 'QT_VERSION_CHECK(6, 8, 1)'
+          Set-Content src/dci/private/ddcifileengine_p.h -Value $dci_h
+          $dci_cpp = Get-Content src/dci/private/ddcifileengine.cpp -Raw
+          $dci_cpp = $dci_cpp -replace 'QT_VERSION_CHECK\(6, 9, 0\)', 'QT_VERSION_CHECK(6, 8, 1)'
+          Set-Content src/dci/private/ddcifileengine.cpp -Value $dci_cpp
 
       - name: Build dtkcore
         working-directory: dtkcore
