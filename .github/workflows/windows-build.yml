@@ -147,7 +147,10 @@ jobs:
           qmake6 ../Tetris.pro "PREFIX=/mingw64"
           mingw32-make
           windeployqt6 release/tetris-deepin.exe --compiler-runtime
-          ldd release/tetris-deepin.exe | grep mingw64 | awk '{print $3}' | xargs -I '{}' cp -n '{}' release/
+          ldd release/tetris-deepin.exe | grep -i "mingw64" | awk '{print $3}' | while read -r dll; do cp -n "$dll" release/ 2>/dev/null || true; done
+          cp -n /mingw64/bin/libdtk6*.dll release/ 2>/dev/null || true
+          cp -n /mingw64/bin/libspdlog.dll release/ 2>/dev/null || true
+          cp -n /mingw64/bin/libuchardet.dll release/ 2>/dev/null || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
