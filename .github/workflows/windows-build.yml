@@ -36,6 +36,7 @@ jobs:
             mingw-w64-x86_64-icu
             mingw-w64-x86_64-uchardet
             mingw-w64-x86_64-libiconv
+            mingw-w64-x86_64-librsvg
             git
 
       # DTK Common
