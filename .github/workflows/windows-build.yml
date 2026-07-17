@@ -43,6 +43,17 @@ jobs:
           cmake --build .
           cmake --install .
 
+      # spdlog
+      - name: Install spdlog
+        run: |
+          git clone --depth 1 -b v1.12.0 https://github.com/gabime/spdlog.git
+          cd spdlog
+          mkdir build
+          cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_EXAMPLE=OFF
+          cmake --build .
+          cmake --install .
+
       # DTK Log (with PR 48)
       - name: Checkout dtklog
         uses: actions/checkout@v7
@@ -62,7 +73,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
           cmake --build .
           cmake --install .
 
@@ -79,7 +90,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
           cmake --build .
           cmake --install .
 
@@ -102,7 +113,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="C:/dtk" -DCMAKE_PREFIX_PATH="C:/dtk" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
           cmake --build .
           cmake --install .
 
