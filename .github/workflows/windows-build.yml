@@ -155,7 +155,7 @@ jobs:
           sed -i '/imageformatplugins/d' CMakeLists.txt
           sed -i 's/find_package(Dtk${DTK_NAME_SUFFIX} REQUIRED COMPONENTS Widget)/find_package(Qt6 COMPONENTS Svg REQUIRED)\nfind_package(Dtk${DTK_NAME_SUFFIX} REQUIRED COMPONENTS Widget)/' CMakeLists.txt
           mkdir build && cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DDTK5=OFF
           cmake --build .
           cmake --install .
 
