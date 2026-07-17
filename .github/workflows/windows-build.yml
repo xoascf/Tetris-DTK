@@ -102,6 +102,7 @@ jobs:
           $cmake = Get-Content src/CMakeLists.txt -Raw
           $cmake = $cmake -replace 'find_package\(ICU REQUIRED COMPONENTS uc\)', ''
           $cmake = $cmake -replace 'pkg_check_modules\(uchardet REQUIRED uchardet\)', ''
+          $cmake = $cmake -replace 'find_package\(Qt6 REQUIRED COMPONENTS CorePrivate\)', ''
           Set-Content src/CMakeLists.txt -Value $cmake
 
       - name: Build dtkcore
