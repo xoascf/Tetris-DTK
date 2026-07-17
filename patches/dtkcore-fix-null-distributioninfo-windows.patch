@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tetris-DTK CI <ci@example.com>
+Date: Fri, 1 Jan 2021 00:00:00 +0000
+Subject: [PATCH] fix: null pointer dereference in distributionOrgName/Website on non-Linux
+
+On Windows, Q_OS_LINUX is not defined, so ensureDistributionInfo() is
+never called. This leaves `distributionInfo` as a null QSharedPointer.
+Subsequent accesses to it via `->stringValue(...)` and `->localizedValue(...)`
+cause an immediate SIGSEGV (access violation at 0x0).
+
+Fix: guard the distributionInfo pointer before dereferencing it, returning
+the fallback value directly when it is null.
+---
+ src/dsysinfo.cpp | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/src/dsysinfo.cpp b/src/dsysinfo.cpp
+index 1111111..2222222 100644
+--- a/src/dsysinfo.cpp
++++ b/src/dsysinfo.cpp
+@@ -949,7 +949,9 @@ QString DSysInfo::distributionOrgName(DSysInfo::OrgType type, const QLocale &lo
+ 
+     QString fallback = type == Distribution ? QStringLiteral("Deepin") : QString();
+ 
+-    return siGlobal->distributionInfo->localizedValue("Name", locale, distributionInfoSectionName(type), fallback);
++    if (!siGlobal->distributionInfo)
++        return fallback;
++    return siGlobal->distributionInfo->localizedValue("Name", locale, distributionInfoSectionName(type), fallback);
+ }
+ 
+ #if DTK_VERSION < DTK_VERSION_CHECK(6, 0, 0, 0)
+@@ -975,8 +977,10 @@ QPair<QString, QString> DSysInfo::distributionOrgWebsite(DSysInfo::OrgType type)
+     QString fallbackSiteName = type == Distribution ? QStringLiteral("www.deepin.org") : QString();
+     QString fallbackSiteUrl = type == Distribution ? QStringLiteral("https://www.deepin.org") : QString();
+ 
+-    return {
+-        siGlobal->distributionInfo->stringValue("WebsiteName", distributionInfoSectionName(type), fallbackSiteName),
+-        siGlobal->distributionInfo->stringValue("Website", distributionInfoSectionName(type), fallbackSiteUrl),
+-    };
++    if (!siGlobal->distributionInfo)
++        return { fallbackSiteName, fallbackSiteUrl };
++    return {
++        siGlobal->distributionInfo->stringValue("WebsiteName", distributionInfoSectionName(type), fallbackSiteName),
++        siGlobal->distributionInfo->stringValue("Website", distributionInfoSectionName(type), fallbackSiteUrl),
++    };
+ }

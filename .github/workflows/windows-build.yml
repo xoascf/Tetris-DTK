@@ -89,6 +89,7 @@ jobs:
       - name: Build dtkcore
         working-directory: dtkcore
         run: |
+          git apply --whitespace=fix ../Tetris-DTK/patches/dtkcore-fix-null-distributioninfo-windows.patch
           mkdir build && cd build
           cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX="/mingw64" -DBUILD_DOCS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DDTK5=OFF
           cmake --build .
