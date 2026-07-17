@@ -27,6 +27,9 @@ jobs:
         run: |
           choco install ninja cmake -y
 
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
       # DTK Common
       - name: Checkout dtkcommon
         uses: actions/checkout@v7
