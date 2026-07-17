@@ -65,7 +65,7 @@ jobs:
         working-directory: dtklog
         run: |
           git fetch origin pull/48/head:pr48
-          git checkout pr48
+          git checkout -f pr48
 
       - name: Build dtklog
         working-directory: dtklog
@@ -103,7 +103,7 @@ jobs:
         working-directory: dtkgui
         run: |
           git fetch origin pull/400/head:pr400
-          git checkout pr400
+          git checkout -f pr400
 
       - name: Build dtkgui
         working-directory: dtkgui
@@ -125,7 +125,7 @@ jobs:
         working-directory: dtkwidget
         run: |
           git fetch origin pull/757/head:pr757
-          git checkout pr757
+          git checkout -f pr757
 
       - name: Build dtkwidget
         working-directory: dtkwidget
