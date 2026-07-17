@@ -12,15 +12,15 @@ jobs:
 
     steps:
       - name: Checkout Tetris-DTK
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: Tetris-DTK
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
-          version: '6.5.3'
-          arch: 'win64_msvc2019_64'
+          version: '6.8.*'
+          arch: 'win64_msvc2022_64'
           cache: 'true'
 
       - name: Install Ninja & CMake
@@ -29,7 +29,7 @@ jobs:
 
       # DTK Common
       - name: Checkout dtkcommon
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: linuxdeepin/dtkcommon
           path: dtkcommon
@@ -45,7 +45,7 @@ jobs:
 
       # DTK Log (with PR 48)
       - name: Checkout dtklog
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: linuxdeepin/dtklog
           path: dtklog
@@ -68,7 +68,7 @@ jobs:
 
       # DTK Core (PR 573 merged commit)
       - name: Checkout dtkcore
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: linuxdeepin/dtkcore
           path: dtkcore
@@ -85,7 +85,7 @@ jobs:
 
       # DTK Gui (with PR 400)
       - name: Checkout dtkgui
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: linuxdeepin/dtkgui
           path: dtkgui
@@ -108,7 +108,7 @@ jobs:
 
       # DTK Widget (with PR 757)
       - name: Checkout dtkwidget
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: linuxdeepin/dtkwidget
           path: dtkwidget
@@ -139,7 +139,7 @@ jobs:
           nmake
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tetris-deepin-windows
           path: Tetris-DTK/build-win/release/tetris-deepin.exe
