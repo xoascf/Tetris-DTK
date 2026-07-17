@@ -151,7 +151,12 @@ jobs:
         working-directory: Tetris-DTK/build-win/release
         run: |
           # 1. Let Qt's own tool handle Qt libraries and plugins
-          windeployqt6 tetris-deepin.exe --compiler-runtime
+          windeployqt6 tetris-deepin.exe --compiler-runtime || true
+
+          # Explicitly copy DTK libraries just to be absolutely certain
+          cp -n /mingw64/bin/libdtk6*.dll . 2>/dev/null || true
+          cp -n /mingw64/bin/libspdlog.dll . 2>/dev/null || true
+          cp -n /mingw64/bin/libuchardet.dll . 2>/dev/null || true
 
           # 2. Recursively resolve ALL mingw64 DLL dependencies
           #    Keep scanning until no new DLLs are discovered
@@ -159,9 +164,10 @@ jobs:
           while [ "$changed" -eq 1 ]; do
             changed=0
             for binary in tetris-deepin.exe *.dll; do
-              ldd "$binary" 2>/dev/null | grep -i '/mingw64/' | awk '{print $3}' | while read -r dep; do
+              # Use || true to prevent set -eo pipefail from aborting the script
+              (ldd "$binary" 2>/dev/null || true) | (grep -iE '[/\\]mingw64[/\\]' || true) | awk '{print $3}' | while read -r dep; do
                 base=$(basename "$dep")
-                if [ ! -f "$base" ]; then
+                if [ ! -f "$base" ] && [ -f "$dep" ]; then
                   cp "$dep" . && echo "Copied: $base"
                   changed=1
                 fi
