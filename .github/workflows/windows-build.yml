@@ -180,14 +180,6 @@ jobs:
           ls -1 *.dll | wc -l
           echo "DLLs total"
 
-      - name: Test Run (GDB Backtrace)
-        working-directory: Tetris-DTK/build-win/release
-        run: |
-          pacman -S --noconfirm mingw-w64-x86_64-gdb
-          export PATH="/mingw64/bin:/mingw64/lib:$PATH"
-          echo "Running tetris-deepin.exe in GDB..."
-          gdb -batch -ex "run" -ex "bt full" -ex "quit" ./tetris-deepin.exe || true
-
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
         with:
