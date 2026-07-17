@@ -6,11 +6,13 @@
 #include <QDir>
 #include <QTranslator>
 
+#include <DGuiApplicationHelper>
 DWIDGET_USE_NAMESPACE
 
 int main(int argc, char *argv[])
 {
     DApplication a(argc, argv);
+    DGuiApplicationHelper::instance()->setPaletteType(DGuiApplicationHelper::DarkType);
     a.loadTranslator();
     a.setOrganizationName("deepin en español");
 

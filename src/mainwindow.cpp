@@ -13,6 +13,10 @@ MainWindow::MainWindow(QWidget *parent)
     setMinimumSize(410, 630);
     setMaximumSize(410, 630);
 
+#ifdef Q_OS_WIN
+    setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+#endif
+
     setCentralWidget(w);
     centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
 
